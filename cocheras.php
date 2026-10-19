@@ -16,8 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Debes seleccionar una estación.';
         } else {
             try {
-                $consulta = $conexion->prepare('INSERT INTO cocheras (id_estacion) VALUES (?)');
-                $consulta->execute([$id_estacion]);
+                $conexion->query("INSERT INTO cocheras (id_estacion) VALUES ($id_estacion)");
                 $_SESSION['mensaje'] = 'Cochera agregada correctamente.';
                 header('Location: cocheras.php');
                 exit;
@@ -33,8 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Debes seleccionar una estación.';
         } else {
             try {
-                $consulta = $conexion->prepare('UPDATE cocheras SET id_estacion = ? WHERE id = ?');
-                $consulta->execute([$id_estacion, $id]);
+                $conexion->query("UPDATE cocheras SET id_estacion = $id_estacion WHERE id = $id");
                 $_SESSION['mensaje'] = 'Cochera actualizada correctamente.';
                 header('Location: cocheras.php');
                 exit;
@@ -47,15 +45,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Primero verificamos que no haya trenes asignados a esta cochera
         // (la base de datos no tiene clave foránea en esa columna).
-        $consulta = $conexion->prepare('SELECT COUNT(*) FROM trenes WHERE id_cochera = ?');
-        $consulta->execute([$id]);
+        $resultado = $conexion->query("SELECT COUNT(*) FROM trenes WHERE id_cochera = $id");
+        $total = $resultado->fetchColumn();
 
-        if ($consulta->fetchColumn() > 0) {
+        if ($total > 0) {
             $_SESSION['error'] = 'No se pudo eliminar la cochera porque tiene trenes asignados.';
         } else {
             try {
-                $consulta = $conexion->prepare('DELETE FROM cocheras WHERE id = ?');
-                $consulta->execute([$id]);
+                $conexion->query("DELETE FROM cocheras WHERE id = $id");
                 $_SESSION['mensaje'] = 'Cochera eliminada correctamente.';
             } catch (PDOException $e) {
                 $_SESSION['error'] = 'No se pudo eliminar la cochera. Inténtalo de nuevo.';
@@ -96,12 +93,9 @@ $estaciones = $conexion->query(
 // ===== Registro que se va a editar (?editar=ID) =====
 $edicion = null;
 if (isset($_GET['editar'])) {
-    echo "se edita";
-    $id_editar = $_GET['editar'];
-    // $consulta = $conexion->prepare('SELECT id, id_estacion FROM cocheras WHERE id = ?');
-    $consulta = $conexion->query("SELECT id, id_estacion FROM cocheras WHERE id = $id_editar");
-    // $consulta->execute([(int) $_GET['editar']]);
-    $edicion = $consulta->fetch() ?: null;
+    $id_editar = (int) $_GET['editar'];
+    $resultado = $conexion->query("SELECT id, id_estacion FROM cocheras WHERE id = $id_editar");
+    $edicion = $resultado->fetch() ?: null;
 }
 
 $titulo_pagina = 'Cocheras — Metro de Trenes';

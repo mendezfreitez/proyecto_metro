@@ -16,9 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Debes escribir el nombre de la línea.';
         } else {
             try {
-                // $consulta = $conexion->prepare('INSERT INTO lineas (nombre) VALUES (?)');
-                // $consulta->execute([$nombre]);
-                $consulta = $conexion->query("INSERT INTO lineas (nombre) VALUES ('$nombre')");
+                $conexion->query("INSERT INTO lineas (nombre) VALUES ('$nombre')");
                 $_SESSION['mensaje'] = 'Línea agregada correctamente.';
                 header('Location: lineas.php');
                 exit;
@@ -34,8 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Debes escribir el nombre de la línea.';
         } else {
             try {
-                $consulta = $conexion->prepare('UPDATE lineas SET nombre = ? WHERE id = ?');
-                $consulta->execute([$nombre, $id]);
+                $conexion->query("UPDATE lineas SET nombre = '$nombre' WHERE id = $id");
                 $_SESSION['mensaje'] = 'Línea actualizada correctamente.';
                 header('Location: lineas.php');
                 exit;
@@ -47,8 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int) ($_POST['id'] ?? 0);
 
         try {
-            $consulta = $conexion->prepare('DELETE FROM lineas WHERE id = ?');
-            $consulta->execute([$id]);
+            $conexion->query("DELETE FROM lineas WHERE id = $id");
             $_SESSION['mensaje'] = 'Línea eliminada correctamente.';
         } catch (PDOException $e) {
             $_SESSION['error'] = 'No se pudo eliminar la línea porque tiene estaciones o trenes asociados.';
@@ -74,9 +70,9 @@ $lineas = $conexion->query('SELECT id, nombre FROM lineas ORDER BY id')->fetchAl
 // ===== Registro que se va a editar (?editar=ID) =====
 $edicion = null;
 if (isset($_GET['editar'])) {
-    $consulta = $conexion->prepare('SELECT id, nombre FROM lineas WHERE id = ?');
-    $consulta->execute([(int) $_GET['editar']]);
-    $edicion = $consulta->fetch() ?: null;
+    $idEditar = (int) $_GET['editar'];
+    $resultado = $conexion->query("SELECT id, nombre FROM lineas WHERE id = $idEditar");
+    $edicion = $resultado->fetch() ?: null;
 }
 
 $titulo_pagina = 'Líneas — Metro de Trenes';

@@ -17,8 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Debes escribir el nombre y seleccionar una línea.';
         } else {
             try {
-                $consulta = $conexion->prepare('INSERT INTO estaciones (nombre, id_lineas) VALUES (?, ?)');
-                $consulta->execute([$nombre, $id_lineas]);
+                $conexion->query("INSERT INTO estaciones (nombre, id_lineas) VALUES ('$nombre', $id_lineas)");
                 $_SESSION['mensaje'] = 'Estación agregada correctamente.';
                 header('Location: estaciones.php');
                 exit;
@@ -35,8 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Debes escribir el nombre y seleccionar una línea.';
         } else {
             try {
-                $consulta = $conexion->prepare('UPDATE estaciones SET nombre = ?, id_lineas = ? WHERE id = ?');
-                $consulta->execute([$nombre, $id_lineas, $id]);
+                $conexion->query("UPDATE estaciones SET nombre = '$nombre', id_lineas = $id_lineas WHERE id = $id");
                 $_SESSION['mensaje'] = 'Estación actualizada correctamente.';
                 header('Location: estaciones.php');
                 exit;
@@ -48,8 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int) ($_POST['id'] ?? 0);
 
         try {
-            $consulta = $conexion->prepare('DELETE FROM estaciones WHERE id = ?');
-            $consulta->execute([$id]);
+            $conexion->query("DELETE FROM estaciones WHERE id = $id");
             $_SESSION['mensaje'] = 'Estación eliminada correctamente.';
         } catch (PDOException $e) {
             $_SESSION['error'] = 'No se pudo eliminar la estación porque tiene cocheras o accesos asociados.';
@@ -83,9 +80,9 @@ $lineas = $conexion->query('SELECT id, nombre FROM lineas ORDER BY nombre')->fet
 // ===== Registro que se va a editar (?editar=ID) =====
 $edicion = null;
 if (isset($_GET['editar'])) {
-    $consulta = $conexion->prepare('SELECT id, nombre, id_lineas FROM estaciones WHERE id = ?');
-    $consulta->execute([(int) $_GET['editar']]);
-    $edicion = $consulta->fetch() ?: null;
+    $idEditar = (int) $_GET['editar'];
+    $resultado = $conexion->query("SELECT id, nombre, id_lineas FROM estaciones WHERE id = $idEditar");
+    $edicion = $resultado->fetch() ?: null;
 }
 
 $titulo_pagina = 'Estaciones — Metro de Trenes';

@@ -17,8 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Debes escribir el nombre y seleccionar una estación.';
         } else {
             try {
-                $consulta = $conexion->prepare('INSERT INTO accesos_estacion (nombre, id_estacion) VALUES (?, ?)');
-                $consulta->execute([$nombre, $id_estacion]);
+                $conexion->query("INSERT INTO accesos_estacion (nombre, id_estacion) VALUES ('$nombre', $id_estacion)");
                 $_SESSION['mensaje'] = 'Acceso agregado correctamente.';
                 header('Location: accesos_estacion.php');
                 exit;
@@ -35,8 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Debes escribir el nombre y seleccionar una estación.';
         } else {
             try {
-                $consulta = $conexion->prepare('UPDATE accesos_estacion SET nombre = ?, id_estacion = ? WHERE id = ?');
-                $consulta->execute([$nombre, $id_estacion, $id]);
+                $conexion->query("UPDATE accesos_estacion SET nombre = '$nombre', id_estacion = $id_estacion WHERE id = $id");
                 $_SESSION['mensaje'] = 'Acceso actualizado correctamente.';
                 header('Location: accesos_estacion.php');
                 exit;
@@ -48,8 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int) ($_POST['id'] ?? 0);
 
         try {
-            $consulta = $conexion->prepare('DELETE FROM accesos_estacion WHERE id = ?');
-            $consulta->execute([$id]);
+            $conexion->query("DELETE FROM accesos_estacion WHERE id = $id");
             $_SESSION['mensaje'] = 'Acceso eliminado correctamente.';
         } catch (PDOException $e) {
             $_SESSION['error'] = 'No se pudo eliminar el acceso. Inténtalo de nuevo.';
@@ -89,9 +86,9 @@ $estaciones = $conexion->query(
 // ===== Registro que se va a editar (?editar=ID) =====
 $edicion = null;
 if (isset($_GET['editar'])) {
-    $consulta = $conexion->prepare('SELECT id, nombre, id_estacion FROM accesos_estacion WHERE id = ?');
-    $consulta->execute([(int) $_GET['editar']]);
-    $edicion = $consulta->fetch() ?: null;
+    $idEditar = (int) $_GET['editar'];
+    $resultado = $conexion->query("SELECT id, nombre, id_estacion FROM accesos_estacion WHERE id = $idEditar");
+    $edicion = $resultado->fetch() ?: null;
 }
 
 $titulo_pagina = 'Accesos estación — Metro de Trenes';

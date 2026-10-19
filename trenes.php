@@ -21,8 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Debes escribir el código, seleccionar una línea y una cochera.';
         } else {
             try {
-                $consulta = $conexion->prepare('INSERT INTO trenes (codigo, id_linea, id_cochera) VALUES (?, ?, ?)');
-                $consulta->execute([$codigo, $id_linea, $id_cochera]);
+                $conexion->query("INSERT INTO trenes (codigo, id_linea, id_cochera) VALUES ('$codigo', $id_linea, $id_cochera)");
                 $_SESSION['mensaje'] = 'Tren agregado correctamente.';
                 header('Location: trenes.php');
                 exit;
@@ -44,8 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Debes escribir el código, seleccionar una línea y una cochera.';
         } else {
             try {
-                $consulta = $conexion->prepare('UPDATE trenes SET codigo = ?, id_linea = ?, id_cochera = ? WHERE id = ?');
-                $consulta->execute([$codigo, $id_linea, $id_cochera, $id]);
+                $conexion->query("UPDATE trenes SET codigo = '$codigo', id_linea = $id_linea, id_cochera = $id_cochera WHERE id = $id");
                 $_SESSION['mensaje'] = 'Tren actualizado correctamente.';
                 header('Location: trenes.php');
                 exit;
@@ -61,8 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int) ($_POST['id'] ?? 0);
 
         try {
-            $consulta = $conexion->prepare('DELETE FROM trenes WHERE id = ?');
-            $consulta->execute([$id]);
+            $conexion->query("DELETE FROM trenes WHERE id = $id");
             $_SESSION['mensaje'] = 'Tren eliminado correctamente.';
         } catch (PDOException $e) {
             $_SESSION['error'] = 'No se pudo eliminar el tren. Inténtalo de nuevo.';
@@ -107,9 +104,9 @@ $cocheras = $conexion->query(
 // ===== Registro que se va a editar (?editar=ID) =====
 $edicion = null;
 if (isset($_GET['editar'])) {
-    $consulta = $conexion->prepare('SELECT id, codigo, id_linea, id_cochera FROM trenes WHERE id = ?');
-    $consulta->execute([(int) $_GET['editar']]);
-    $edicion = $consulta->fetch() ?: null;
+    $idEditar = (int) $_GET['editar'];
+    $resultado = $conexion->query("SELECT id, codigo, id_linea, id_cochera FROM trenes WHERE id = $idEditar");
+    $edicion = $resultado->fetch() ?: null;
 }
 
 $titulo_pagina = 'Trenes — Metro de Trenes';
